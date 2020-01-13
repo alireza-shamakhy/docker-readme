@@ -1,0 +1,128 @@
+docker technology == namespacing and control group
+namespacing = processor, hard drive - users - network - hostnames - inter process communication : isolating resource per process(or group of processes)
+
+control groups(vgroups) = Memory - CPU Usage - IO - Network bandwidth : limit amount of resources used per process
+
+
+//creates and run and stdout output
+//docker run = docker create , docker run
+docker run hello-world
+
+//creates container
+docker create hello-world : 955gdhjgjgdjgajfdgjfdhfd
+
+//then start -a means wait for output and stdout
+docker start -a 955gdhjgjgdjgajfdgjfdhfd
+
+
+/// override startup command after downloading image and before running container
+docker run busybox echo hi there
+docker run busybox ls
+
+//to run longer be able to ps
+docker run busybox ping google.com
+docker ps
+
+
+all the containers we have created
+docker ps --all
+
+➜  bin docker ps --all
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS                    PORTS               NAMES
+
+05f5eaf31504        busybox             "echo hi there"     2 days ago          Exited (0) 2 days ago                         dazzling_gagarin                       sharp_kalam
+
+//start docker again . we cannot start a container which already exited like above
+with another start command.
+
+➜  bin docker start -a 05f5eaf31504
+hi there
+➜  bin
+
+
+//delete from disk and cache
+docker system prune
+
+
+
+docker logs = not rerun or restart any container - just for getting and debug outputs
+
+➜  bin docker create busybox echo hi there
+2b526e7e4a3657335cf467871e3b8a88391005bd6ef118f4cae81d55e9561983
+➜  bin docker start 2b526e7e4a3657335cf467871e3b8a88391005bd6ef118f4cae81d55e9561983
+2b526e7e4a3657335cf467871e3b8a88391005bd6ef118f4cae81d55e9561983
+➜  bin docker logs 2b526e7e4a3657335cf467871e3b8a88391005bd6ef118f4cae81d55e9561983
+hi there
+➜  bin
+
+
+stop a container
+
+docker stop containerid = sends sigterm (stop ) signal good for clean ( waits 10 seconds , then kills)
+docker kill containerid= SIGKILL (stop right now.
+
+-------
+docker run redis
+
+run second command inside container like redis-cli
+
+//-it enable typing input inside conatiner
+docker exec -it id
+
+
+➜  workspace docker ps
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS               NAMES
+0abeb0f82466        redis               "docker-entrypoint.s…"   2 minutes ago       Up 2 minutes        6379/tcp            sad_pasteur
+➜  workspace docker exec -it 0abeb0f82466 redis-cli
+127.0.0.1:6379> set myvalue 5
+OK
+127.0.0.1:6379> get myvalue
+"5"
+
+
+----
+-it => -i -t  => -i: stdin  -t:stdout in nicely format
+STDIN   STDOUT     STDERR
+
+teminal = inoput output error
+
+-----
+
+shell or terminal access inside running container: (sh = command processor like bash, zsh, powershell)
+
+docker exec -it 0abeb0f82466 sh
+
+ctrl+d = exit
+
+--- docker run and start shell at startup
+docker run -it busybox sh
+
+--
+
+docker build -f Dockerfile.dev .
+
+docker run -p 3000:3000 b27b5b268ff3
+
+docker run -p 3000:3000 -v /app/node_modules -v $(pwd):/app b27b5b268ff3
+
+--------------------
+docker-compose up --build
+-----
+
+docker run -it 0362927b6ff9 npm run test
+-------------
+
+or to live update tests: (in second terminal) == we can enter values since -it (attach terminal)
+docker exec -it docker-id npm run test
+
+---
+
+docker attach
+
+docker exec -it eb6518779d47 sh
+--
+
+==production
+docker build .
+
+docker run -p 8080:80 910b06a9df17

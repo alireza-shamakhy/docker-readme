@@ -1,0 +1,354 @@
+
+aws iam list-users
+
+aws ec2 create-security-group --group-name ali_security_group_sydney --description "Security group for ali on sydney"
+security id:
+{
+    "GroupId": "sg-0bb6cece2366bf509"
+}
+
+aws ec2 describe-security-groups --group-id sg-0bb6cece2366bf509
+
+
+aws ec2 authorize-security-group-ingress --group-id sg-0bb6cece2366bf509 --protocol tcp --port 22 --cidr 0.0.0.0/0
+aws ec2 authorize-security-group-ingress --group-id sg-0bb6cece2366bf509 --protocol tcp --port 80 --cidr 0.0.0.0/0
+
+--postgres
+aws ec2 authorize-security-group-ingress --group-id sg-0bb6cece2366bf509 --protocol tcp --port 5432 --cidr 0.0.0.0/0 --source-group sg-0bb6cece2366bf509
+
+--redis
+aws ec2 authorize-security-group-ingress --group-id sg-0bb6cece2366bf509 --protocol tcp --port 6379 --cidr 0.0.0.0/0 --source-group sg-0bb6cece2366bf509
+
+--delete security group
+aws ec2 delete-security-groups --group-id = lllll
+
+ecsInstanceRole_ali
+ecsServiceRole_ali
+
+
+aws ecs create-cluster --cluster-name deepdive
+aws ecs list-clusters
+aws ecs describe-clusters --clusters deepdive
+
+aws ecs delete-clustert --cluster deepdive
+
+aws s3api create-bucket --bucket ali-deepdive --region ap-southeast-2 --create-bucket-configuration LocationConstraint=ap-southeast-2
+aws s3 cp ecs.config s3://ali-deepdive/ecs.config  ===upload file
+aws s3 ls s3://ali-deepdive
+
+
+
+bash file
+#!/bin/bash
+yum install -y aws-cli
+aws s3 cp s3://ali-deepdive/ecs.config /etc/ecs/ecs.config
+
+
+aws ec2 run-instances --image-id ami-00bf6a5319a7d03d4 --count 1 --instance-type t2.micro --iam-instance-profile Name=ecsInstanceRole_ali --security-group-ids sg-0bb6cece2366bf509 --user-data file://copy-ecs-config-to-s3
+The ami-00bf6a5319a7d03d4 is the official Amazon ECS AMI for sydney
+
+94c505dbd8a10cb79a93d55ecbfefa41 = klaviyo
+ "InstanceId": "i-0317845d224e643bb",
+
+
+
+aws ec2 describe-instance-status --instance-id i-0317845d224e643bb
+
+aws ecs list-container-instances --cluster deepdive
+
+aws ecs describe-container-instances --cluster deepdive --container-instances arn:aws:ecs:ap-southeast-2:358949776315:container-instance/6b99421a-0765-492f-9e70-9ec23d1da8cf
+
+
+aws ec2 terminate-instances --instance-ids *****
+
+ws ecs list-container-instances --cluster deepdiv
+
+
+
+
+---tasks
+
+  aws ecs register-task-definition --cli-input-json file://web-task-definition.json
+
+  aws ecs list-task-definition-families
+
+  aws ecs list-task-definitions
+
+  ➜  deepdive 2 aws ecs list-task-definitions
+  {
+      "taskDefinitionArns": [
+          "arn:aws:ecs:ap-southeast-2:358949776315:task-definition/first-run-task-definition:1",
+          "arn:aws:ecs:ap-southeast-2:358949776315:task-definition/web:1"
+      ]
+  }
+ aws ecs describe-task-definition --task-definition web:1
+
+aws ecs deregister-task-definition --task-definition web:2
+
+aws ecs register-task-definition help
+aws ecs register-task-definition --generate-cli-skeleton
+
+----services
+aws ecs create-service --cluster deepdive --service-name web --task-definition web --desired-count 1
+
+aws ecs list-services --cluster deepdive
+
+aws ecs describe-services --cluster deepdive --services web
+
+aws ec2 describe-instances  == get "PublicDnsName": "ec2-13-238-117-214.ap-southeast-2.compute.amazonaws.com",
+http://ec2-13-238-117-214.ap-southeast-2.compute.amazonaws.com/
+
+instanceid = i-0317845d224e643bb
+
+--update
+aws ecs update-service --cluster deepdive --service web --task-definition web --desired-count 2
+
+
+--delete
+first:  aws ecs update-service --cluster deepdive --service web --task-definition web --desired-count 0
+then: aws ecs delete-service --cluster deepdive --service web
+
+aws ecs list-services --cluster deepdive
+aws ecs create-service --generate-cli-skeleton
+
+-----starting tasks
+aws ecs run-task --cluster deepdive --task-definition web --count 1
+
+aws ecs list-tasks --cluster deepdive
+
+aws ecs stop-task --cluster deepdive --task arn:aws:ecs:ap-southeast-2:358949776315:task/cdd50bb4-e40b-4b5f-9d42-5873b3328744
+
+
+aws ecs list-container-instances --cluster deepdive == get arn: arn:aws:ecs:ap-southeast-2:358949776315:container-instance/6b99421a-0765-492f-9e70-9ec23d1da8cf
+--start task
+aws ecs start-task --cluster deepdive --task-definition web --container-instances arn:aws:ecs:ap-southeast-2:358949776315:container-instance/6b99421a-0765-492f-9e70-9ec23d1da8cf
+==="taskArn": "arn:aws:ecs:ap-southeast-2:358949776315:task/80fb2b73-453e-4112-9316-ae19f7b5b47a",
+==stop
+aws ecs stop-task --cluster deepdive --task arn:aws:ecs:ap-southeast-2:358949776315:task/80fb2b73-453e-4112-9316-ae19f7b5b47a
+
+--ECR == managed docker registry
+aws ecr get-login --no-include-email --region ap-southeast-2
+
+paste and login
+
+Registry url: https://358949776315.dkr.ecr.ap-southeast-2.amazonaws.com
+Registry url: https://358949776315.dkr.ecr.ap-southeast-2.amazonaws.com
+
+aws ecr create-repository --repository-name deepdive/nginx
+
+aws ecr describe-repositories
+
+aws ecr list-images --repository-name deepdive/nginx
+
+docker pull nginx:1.9
+docker tag nginx:1.9 358949776315.dkr.ecr.ap-southeast-2.amazonaws.com/deepdive/nginx:1.9
+
+docker push 358949776315.dkr.ecr.ap-southeast-2.amazonaws.com/deepdive/nginx:1.9
+
+aws ecr list-images --repository-name deepdive/nginx
+{
+    "imageIds": [
+        {
+            "imageTag": "1.9",
+            "imageDigest": "sha256:47baebffb23533d43d204167162dc6a8f0a3a59eea68942d81915e09bc49c4d9"
+        }
+    ]
+}
+
+Then update task definition file (image)
+{
+  "containerDefinitions": [
+    {
+      "name": "nginx",
+      "image": "358949776315.dkr.ecr.ap-southeast-2.amazonaws.com/deepdive/nginx:1.9",
+      "portMappings": [
+        {
+          "containerPort": 80,
+          "hostPort": 80
+        }
+      ],
+      "memory": 50,
+      "cpu": 102
+    }
+  ],
+  "family": "web"
+}
+
+aws ecs register-task-definition --cli-input-json file://web-task-definition.json
+
+aws ecs run-task --cluster deepdive --task-definition web --count 1
+http://ec2-13-238-117-214.ap-southeast-2.compute.amazonaws.com/
+
+
+delete cluster & anything
+
+aws ec2 terminate-instances --instance-ids i-0317845d224e643bb
+aws s3 rm s3://ali-deepdive --recursive
+aws s3api delete-bucket --bucket ali-deepdive
+
+aws ecr delete-repository --repository-name deepdive/nginx --force
+
+aws ecs delete-cluster --cluster deepdive
+
+
+------------------
+---ruby
+
+docker run --rm  \
+-v "$PWD":/usr/src/app -w /usr/src/app rails:4 \
+rails new --skip-bundle dockerzon
+
+docker compose up
+docker volume ls
+docker network ls
+docker exec --user "$(id -u):$(id -g)" dockerzone_dockerzone_1 rake db:reset
+docker exec -it dockerzon_dockerzon_1 bash
+docker exec -it dockerzon_redis_1 redis-cli
+
+-------------
+elb
+
+Get a list of subnets in your default VPC
+aws ec2 describe-subnets
+● Make note of MOST OF the SubnetId fields in the JSON output
+● Only make note of the ones where the associated DefaultForAz is true
+Create the ELB
+aws elb create-load-balancer --load-balancer-name dockerzon-web \
+--listeners \
+"Protocol=HTTP,LoadBalancerPort=80,InstanceProtocol=HTTP,InstancePort=80" \
+--subnets subnet-5e40c063 subnet-43bca768 subnet-ffc128a7 subnet-0d61b67b \
+--security-groups sg-5f63c627
+
+
+----
+
+
+DOCKER FILE
+
+FROM python
+Run apt_get update
+
+
+---
+docker build -t docker_zone .
+----
+
+aws rds create-db-instance --engine postgres \
+--no-multi-az --no-publicly-accessible \
+--vpc-security-group-ids sg-5f63c627 \
+--db-instance-class db.t2.micro --allocated-storage 20 \
+--db-instance-identifier dockerzon-production \
+--db-name dockerzon_production --master-username dockerzon \
+--master-user-password intergalacticzebramoldfactory
+
+
+
+
+
+------
+Register the web task definition that you downloaded
+# Make sure you're in the production/ folder when executing this command
+aws ecs register-task-definition \
+--cli-input-json file://web-task-definition.json
+
+{
+  "containerDefinitions": [
+    {
+      "name": "nginx",
+      "image": "xxx.dkr.ecr.us-east-1.amazonaws.com/dockerzon/nginx",
+      "portMappings": [
+        {
+          "containerPort": 80,
+          "hostPort": 80
+        }
+      ],
+      "links": ["dockerzon:dockerzon"],
+      "volumesFrom": [
+        {
+          "sourceContainer": "dockerzon"
+        }
+      ],
+      "cpu": 256,
+      "memory": 100
+    },
+    {
+      "name": "dockerzon",
+      "image": "xxx.dkr.ecr.us-east-1.amazonaws.com/dockerzon/dockerzon",
+      "portMappings": [
+        {
+          "containerPort": 8000,
+          "hostPort": 8000
+        }
+      ],
+      "cpu": 768,
+      "memory": 300,
+      "environment": [
+        {
+          "name": "RAILS_ENV",
+          "value": "production"
+        },
+        {
+          "name": "DATABASE_URL",
+          "value": "postgresql://dockerzon:intergalacticzebramoldfactory@xxx:5432/dockerzon?encoding=utf8&pool=40&timeout=5000"
+        },
+        {
+          "name": "CACHE_URL",
+          "value": "redis://xxx:6379"
+        },
+        {
+          "name": "JOB_WORKER_URL",
+          "value": "redis://xxx:6379"
+        },
+        {
+          "name": "SECRET_TOKEN",
+          "value": "xxx"
+        }
+      ]
+    }
+  ],
+  "family": "web"
+}
+
+
+-----
+Initialize the database with the reset task
+aws ecs run-task --cluster production --task-definition db-reset --count 1
+Deregister the extremely dangerous reset task
+aws ecs deregister-task-definition --task-definition db-reset:1
+
+
+---------
+web-service.json
+scheduling service
+{
+    "cluster": "production",
+    "serviceName": "web",
+    "taskDefinition": "web",
+    "loadBalancers": [
+        {
+            "loadBalancerName": "dockerzon-web",
+            "containerName": "nginx",
+            "containerPort": 80
+        }
+    ],
+    "role": "ecsServiceRole_ali",
+    "desiredCount": 2,
+    "deploymentConfiguration": {
+        "maximumPercent": 100,
+        "minimumHealthyPercent": 50
+    }
+}
+
+Create the web service
+# Make sure you're in the production/ folder when executing this command
+aws ecs create-service --cli-input-json file://web-service.json
+
+
+----
+Build a new version of the application
+docker-compose build
+Tag the Dockerzon image
+docker tag -f dockerzon_dockerzon:latest \
+xxx.dkr.ecr.us-east-1.amazonaws.com/dockerzon/dockerzon:latest
+
+
