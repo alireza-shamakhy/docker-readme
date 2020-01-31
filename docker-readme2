@@ -1,0 +1,53 @@
+docker ps --all : list all containers including running and exited one.
+docker ps : list only running containers
+
+docker run centos: means create and running ; downloading image and create a container
+docker run busybox = runs and finishes , docker ps doesn't show
+docker run -it busybox sh = then in docker ps it shows otherwise doesn't
+
+DOCKER RUN: creates and executes a container
+every time we RUN: it creates a new container
+if we want to go inside  already running container we should : docker exec -it container-id
+
+if we exited a docker container , we just need to start it again:
+docker start containerid
+
+docker run centos: create and run container from centos image
+
+docker run -it --name ali-centos centos /bin/bash
+
+For example, to run a container from the centos image named test-ali-volume and map the
+test-ali-volume to the container's /data directory, the command is:
+docker run -it --name ali-centos2 -v test-ali-volume:/data centos /bin/bash
+then we can create a tt.txt indside data directory and below also can see the same file:
+docker run -it --name ali-busy-volume -v test-ali-volume:/data busybox sh
+
+docker stop ali-centos
+
+docker run -it -v test-ali-volume:/data ali-centos /bin/bash
+
+docker stop id
+dcoker rm id
+docker rm --force 27adb67c850f
+
+docker cp ckan:/etc/ckan/production.ini .
+
+docker cp production.ini ckan:/etc/ckan/
+docker-compose restart ckan
+
+screen ~/Library/Containers/com.docker.docker/Data/vms/0/tty
+/var/lib/docker/volumes/test-ali-volume/_data
+
+
+docker run -it busybox sh
+docker run -it busybox sh
+:then we have two containers in "docker ps"
+
+docker exec -it ckan sh
+ docker volume ls
+docker exec -it db  psql -U ckan
+A Docker volume "lives" outside the container, on the host machine.
+docker volume create --name [volume name]
+
+docker volume  docker_pg_data
+
