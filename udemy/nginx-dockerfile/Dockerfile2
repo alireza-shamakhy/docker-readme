@@ -1,0 +1,18 @@
+#EXAMPLE SUDO
+FROM ubuntu:latest
+
+ENV TT=amd
+
+WORKDIR /build
+
+COPY ./test.html .
+
+RUN bild
+
+WORKDIR /dist
+
+RUN cp /tt.html .
+
+EXPOSE 8000
+
+ENTRYPOINT ["/usr/httpd"]
